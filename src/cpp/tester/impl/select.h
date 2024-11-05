@@ -14,9 +14,9 @@ namespace event_benchmark {
 			TesterImpl();
 			virtual ~TesterImpl();
 			
-			bool construct_test_environment(const uint64_t count);
-			void measure_reaction_time();
-			void measure_throughput();
+			bool construct_test_environment(const uint64_t count) override;
+			void measure_reaction_time() override;
+			void measure_throughput() override;
 			
 			[[nodiscard]] ReactionTime get_reaction_time() const override;
 			[[nodiscard]] Throughput get_throughput() const override;
