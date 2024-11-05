@@ -14,12 +14,12 @@ namespace event_benchmark {
 			TesterImpl();
 			virtual ~TesterImpl();
 			
-			bool construct_test_environment(uint64_t count);
+			bool construct_test_environment(const uint64_t count);
 			void measure_reaction_time();
 			void measure_throughput();
 			
-			ReactionTime get_reaction_time();
-			Throughput get_throughput();
+			[[nodiscard]] ReactionTime get_reaction_time() const override;
+			[[nodiscard]] Throughput get_throughput() const override;
 		};
 	}
 }

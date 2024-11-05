@@ -29,12 +29,12 @@ namespace event_benchmark {
 		Tester() { }
 		virtual ~Tester() { }
 		
-		virtual bool construct_test_environment(uint64_t count) = 0;
+		virtual bool construct_test_environment(const uint64_t count) = 0;
 		virtual void measure_reaction_time() = 0;
 		virtual void measure_throughput() = 0;
 		
-		virtual ReactionTime get_reaction_time() = 0;
-		virtual Throughput get_throughput() = 0;
+		[[nodiscard]] virtual ReactionTime get_reaction_time() const = 0;
+		[[nodiscard]] virtual Throughput get_throughput() const = 0;
 	};
 }
 

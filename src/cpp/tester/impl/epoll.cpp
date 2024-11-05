@@ -19,12 +19,12 @@ namespace event_benchmark::epoll {
 	void TesterImpl::measure_throughput() {
 	}
 
-	ReactionTime TesterImpl::get_reaction_time() {
+	ReactionTime TesterImpl::get_reaction_time() const {
 		ReactionTime result = {0ns, 0ns, 0ns};
 		return result;
 	}
 
-	Throughput TesterImpl::get_throughput() {
+	Throughput TesterImpl::get_throughput() const {
 		Throughput result = {0, 0, 0};
 		return result;
 	}
