@@ -1,0 +1,45 @@
+if(NOT EXISTS "@CMAKE_INSTALL_PREFIX@/@PROJECT_NAME.install_manifest.txt")
+	message(FATAL_ERROR "Cannot find install manifest: @CMAKE_INSTALL_PREFIX@/@PROJECT_NAME.install_manifest.txt")
+endif()
+
+file(READ "@CMAKE_INSTALL_PREFIX@/@PROJECT_NAME.install_manifest.txt" files)
+string(REPLACE "\n" ";" files "${files}")
+
+foreach(file ${files})
+	if(EXISTS "${file}")
+		execute_process(COMMAND ${CMAKE_COMMAND} -E remove "${file}")
+	endif()
+endforeach()
+
+# Remove directories if they are empty
+function(remove_empty_directories dir)
+	file(GLOB children RELATIVE "${dir}" "${dir}/*")
+	foreach(child ${children})
+		if(IS_DIRECTORY "${dir}/${child}")
+			remove_empty_directories("${dir}/${child}")
+		endif()
+	endforeach()
+
+	file(GLOB remaining_contents RELATIVE "${dir}" "${dir}/*")
+	if(NOT remaining_contents)
+		execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}")
+	endif()
+endfunction()
+
+set(directories_to_check "@CMAKE_INSTALL_PREFIX@/include" "@CMAKE_INSTALL_PREFIX@/lib")
+foreach(dir ${directories_to_check})
+	if(IS_DIRECTORY "${dir}")
+		remove_empty_directories("${dir}")
+	endif()
+endforeach()
+
+# Remove manifest file
+if(EXISTS "@CMAKE_INSTALL_PREFIX@/@PROJECT_NAME.install_manifest.txt")
+	execute_process(COMMAND ${CMAKE_COMMAND} -E remove "@CMAKE_INSTALL_PREFIX@/@PROJECT_NAME.install_manifest.txt")
+endif()
+
+# Remove install directory if it is empty
+if (NOT "@CMAKE_INSTALL_PREFIX@" STREQUAL "/usr/local")
+	message(STATUS "Remove installed directory: @CMAKE_INSTALL_PREFIX@")
+	remove_empty_directories("@CMAKE_INSTALL_PREFIX@")
+endif()

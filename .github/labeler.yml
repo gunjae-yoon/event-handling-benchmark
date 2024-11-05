@@ -1,0 +1,16 @@
+lang/cpp:
+  - '**/*.cpp'
+  - '**/*.cc'
+  - '**/*.h'
+  - '**/*.hpp'
+lang/python:
+  - '**/*.py'
+lang/bash:
+  - '**/*.sh'
+area/infra:
+  - 'github/**'
+  - '.git*'
+build/cmake:
+  - '**/CMakeLists.txt'
+build/input:
+  - '**/*.in'
