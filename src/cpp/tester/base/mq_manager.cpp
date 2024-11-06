@@ -1,4 +1,4 @@
-#include "tester/base/mq_manager.h"
+#include "mq_manager.h"
 #include <stdexcept>
 #include <iostream>
 
