@@ -14,7 +14,7 @@ namespace event_benchmark {
 			TesterImpl();
 			virtual ~TesterImpl();
 			
-			bool construct_test_environment(const uint64_t count) override;
+			bool construct_test_environment(std::shared_ptr<MqManager> mq_manager) override;
 			void measure_reaction_time() override;
 			void measure_throughput() override;
 			
