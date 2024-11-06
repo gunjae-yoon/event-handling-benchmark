@@ -3,7 +3,7 @@
 #include <iostream>
 
 namespace event_benchmark {
-	Generator::Generator() :
+	Generator::Generator() noexcept :
 		manager(nullptr),
 		is_running(false) {
 	}

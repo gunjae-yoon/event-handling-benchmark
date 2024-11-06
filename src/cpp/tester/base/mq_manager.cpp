@@ -5,7 +5,7 @@
 namespace event_benchmark {
 	std::atomic<uint64_t> MqManager::id = 0;
 
-	MqManager::MqManager() {
+	MqManager::MqManager() noexcept {
 		attr.mq_curmsgs = 0;
 		attr.mq_flags = 0;
 		attr.mq_maxmsg = 10;
