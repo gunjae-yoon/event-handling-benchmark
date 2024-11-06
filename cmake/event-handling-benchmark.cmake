@@ -3,6 +3,7 @@ set(CMAKE_TARGET_NAME "event-handling-benchmark")
 add_executable(${CMAKE_TARGET_NAME}
 	src/cpp/app/main.cpp
 	src/cpp/tester/base/generator.cpp
+	src/cpp/tester/base/mq_manager.cpp
 	src/cpp/tester/impl/epoll.cpp
 	src/cpp/tester/impl/multithreading.cpp
 	src/cpp/tester/impl/select.cpp
