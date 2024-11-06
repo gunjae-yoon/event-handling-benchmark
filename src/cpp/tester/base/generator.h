@@ -9,7 +9,7 @@
 namespace event_benchmark {
 	class Generator {
 	public:
-		Generator();
+		Generator() noexcept;
 		~Generator();
 		
 		bool construct_test_environment(std::shared_ptr<MqManager> mq_manager);

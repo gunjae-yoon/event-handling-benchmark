@@ -14,7 +14,7 @@ namespace event_benchmark {
 
 	class MqManager {
 	public:
-		MqManager();
+		MqManager() noexcept;
 		~MqManager();
 		
 		bool reset(const uint64_t count = 0, const uint64_t msg_size = 0);
