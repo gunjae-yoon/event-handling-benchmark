@@ -1,5 +1,5 @@
-#ifndef __event_handling_benchmark_tester_base_generator_h__
-#define __event_handling_benchmark_tester_base_generator_h__
+#ifndef __event_handling_benchmark_tester_base_mq_manager_h__
+#define __event_handling_benchmark_tester_base_mq_manager_h__
 
 #include <mqueue.h>
 #include <atomic>
