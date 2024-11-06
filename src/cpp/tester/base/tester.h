@@ -1,8 +1,10 @@
 #ifndef __event_handling_benchmark_tester_base_tester_h__
 #define __event_handling_benchmark_tester_base_tester_h__
 
+#include "mq_manager.h"
 #include <cstdint>
 #include <chrono>
+#include <memory>
 
 #if __cplusplus >= 202300L
 #include <stdfloat>
@@ -29,7 +31,7 @@ namespace event_benchmark {
 		Tester() { }
 		virtual ~Tester() { }
 		
-		virtual bool construct_test_environment(const uint64_t count) = 0;
+		virtual bool construct_test_environment(std::shared_ptr<MqManager> mq_manager) = 0;
 		virtual void measure_reaction_time() = 0;
 		virtual void measure_throughput() = 0;
 		

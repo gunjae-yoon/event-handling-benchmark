@@ -9,7 +9,7 @@ namespace event_benchmark::multithreading {
 	TesterImpl::~TesterImpl() {
 	}
 
-	bool TesterImpl::construct_test_environment(uint64_t count) {
+	bool TesterImpl::construct_test_environment(std::shared_ptr<MqManager> mq_manager) {
 		return true;
 	}
 
