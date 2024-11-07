@@ -3,7 +3,7 @@
 using namespace std::chrono_literals;
 
 namespace event_benchmark::epoll {
-	TesterImpl::TesterImpl() {
+	TesterImpl::TesterImpl() : Tester() {
 	}
 
 	TesterImpl::~TesterImpl() {
