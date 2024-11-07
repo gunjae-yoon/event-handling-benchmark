@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <chrono>
 #include <memory>
+#include <thread>
 
 #if __cplusplus >= 202300L
 #include <stdfloat>
@@ -28,15 +29,21 @@ namespace event_benchmark {
 		};
 
 	public:
-		Tester() { }
-		virtual ~Tester() { }
+		Tester();
+		virtual ~Tester();
 		
 		virtual bool construct_test_environment(std::shared_ptr<MqManager> mq_manager) = 0;
 		virtual void measure_reaction_time() = 0;
 		virtual void measure_throughput() = 0;
+		void stop() noexcept;
 		
 		[[nodiscard]] virtual ReactionTime get_reaction_time() const = 0;
 		[[nodiscard]] virtual Throughput get_throughput() const = 0;
+	
+	protected:
+		std::shared_ptr<MqManager> manager;
+		std::atomic<bool> is_running;
+		std::thread running_thread;
 	};
 }
 
