@@ -32,7 +32,7 @@ namespace event_benchmark {
 		Tester();
 		virtual ~Tester();
 		
-		virtual bool construct_test_environment(std::shared_ptr<MqManager> mq_manager) = 0;
+		virtual bool construct_test_environment(std::shared_ptr<MqManager> mq_manager);
 		virtual void measure_reaction_time() = 0;
 		virtual void measure_throughput() = 0;
 		void stop() noexcept;

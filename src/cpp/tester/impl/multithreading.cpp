@@ -10,6 +10,10 @@ namespace event_benchmark::multithreading {
 	}
 
 	bool TesterImpl::construct_test_environment(std::shared_ptr<MqManager> mq_manager) {
+		if (Tester::construct_test_environment(mq_manager) == false) {
+			return false;
+		}
+		
 		return true;
 	}
 
