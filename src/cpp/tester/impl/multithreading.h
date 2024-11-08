@@ -2,7 +2,6 @@
 #define __event_handling_benchmark_tester_impl_multithreading_h__
 
 #include "tester/base/tester.h"
-#include <vector>
 #include <list>
 #include <mutex>
 
@@ -24,7 +23,7 @@ namespace event_benchmark {
 			[[nodiscard]] ReactionTime get_reaction_time() override;
 			[[nodiscard]] Throughput get_throughput() override;
 		
-		public:
+		private:
 			std::vector<std::thread> threads;
 			struct {
 				std::list<uint64_t> results;
