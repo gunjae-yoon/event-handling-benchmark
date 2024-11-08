@@ -18,17 +18,27 @@ namespace event_benchmark::select {
 	}
 
 	void TesterImpl::measure_reaction_time() {
+		if (is_running.load()) {
+			return;
+		}
+		
+		is_running.store(true);
 	}
 
 	void TesterImpl::measure_throughput() {
+		if (is_running.load()) {
+			return;
+		}
+		
+		is_running.store(true);
 	}
 
-	ReactionTime TesterImpl::get_reaction_time() const {
+	ReactionTime TesterImpl::get_reaction_time() {
 		ReactionTime result = {0ns, 0ns, 0ns};
 		return result;
 	}
 
-	Throughput TesterImpl::get_throughput() const {
+	Throughput TesterImpl::get_throughput() {
 		Throughput result = {0, 0, 0};
 		return result;
 	}

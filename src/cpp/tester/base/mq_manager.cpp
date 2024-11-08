@@ -20,7 +20,6 @@ namespace event_benchmark {
 		// step 1. close and remove(unlink) previous message queues
 		for (mq_desc& desc : queues) {
 			mq_close(desc.second);
-			mq_unlink(desc.first.c_str());
 		}
 		queues.clear();
 		if (queues.capacity() < count) {
@@ -48,5 +47,17 @@ namespace event_benchmark {
 		}
 		
 		return true;
+	}
+
+	void MqManager::dispose() {
+		for (mq_desc& desc : queues) {
+			mq_close(desc.second);
+			mq_unlink(desc.first.c_str());
+		}
+		queues.clear();
+	}
+
+	uint64_t MqManager::msg_size() {
+		return attr.mq_msgsize;
 	}
 }

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <list>
 
 namespace event_benchmark {
 	using mq_desc = std::pair<std::string, mqd_t>;
@@ -18,6 +19,8 @@ namespace event_benchmark {
 		~MqManager();
 		
 		bool reset(const uint64_t count = 0, const uint64_t msg_size = 0);
+		void dispose();
+		uint64_t msg_size();
 	
 	public:
 		std::vector<mq_desc> queues;
