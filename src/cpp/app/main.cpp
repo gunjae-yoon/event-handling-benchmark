@@ -40,6 +40,8 @@ void test_reaction_time_of_multithreading(const uint64_t count, const uint64_t s
 		generator.measure_reaction_time();
 		std::this_thread::sleep_for(10s);
 		generator.stop();
+		manager.reset();
+		exit(0);
 	} else { // parent process
 		multithreading::TesterImpl tester;
 		if (tester.construct_test_environment(manager) == false) {
@@ -53,12 +55,13 @@ void test_reaction_time_of_multithreading(const uint64_t count, const uint64_t s
 		manager->dispose();
 		
 		waitpid(pid, nullptr, 0);
-		std::cout << "minimum reaction time: " << result.minimum.count() << " ns" << std::endl;
-		std::cout << "maximum reaction time: " << result.maximum.count() << " ns" << std::endl;
-		std::cout << "average reaction time: " << result.average.count() << " ns" << std::endl;
+		
+		std::cout << "[Multithreading]" << std::endl;
+		std::cout << "    minimum reaction time: " << result.minimum.count() << " ns" << std::endl;
+		std::cout << "    maximum reaction time: " << result.maximum.count() << " ns" << std::endl;
+		std::cout << "    average reaction time: " << result.average.count() << " ns" << std::endl;
+		manager.reset();
 	}
-
-	manager.reset();
 }
 
 void test_throughput_of_multithreading(const uint64_t count, const uint64_t size) {
@@ -81,6 +84,8 @@ void test_throughput_of_multithreading(const uint64_t count, const uint64_t size
 		generator.measure_throughput();
 		std::this_thread::sleep_for(10s);
 		generator.stop();
+		manager.reset();
+		exit(0);
 	} else { // parent process
 		multithreading::TesterImpl tester;
 		if (tester.construct_test_environment(manager) == false) {
@@ -94,10 +99,11 @@ void test_throughput_of_multithreading(const uint64_t count, const uint64_t size
 		manager->dispose();
 		
 		waitpid(pid, nullptr, 0);
-		std::cout << "minimum throhgput: " << result.minimum << " dps" << std::endl;
-		std::cout << "maximum throhgput: " << result.maximum << " dps" << std::endl;
-		std::cout << "average throhgput: " << result.average << " dps" << std::endl;
+		
+		std::cout << "[Multithreading]" << std::endl;
+		std::cout << "    minimum throhgput: " << result.minimum << " dps" << std::endl;
+		std::cout << "    maximum throhgput: " << result.maximum << " dps" << std::endl;
+		std::cout << "    average throhgput: " << result.average << " dps" << std::endl;
+		manager.reset();
 	}
-
-	manager.reset();
 }
