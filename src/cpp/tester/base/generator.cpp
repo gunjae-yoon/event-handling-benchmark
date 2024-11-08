@@ -36,8 +36,8 @@ namespace event_benchmark {
 					if (mq_send(desc.second, reinterpret_cast<const char*>(&count), sizeof(uint64_t), 0) == -1) {
 						std::cerr << "Failed to send message to " << desc.first << std::endl;
 					}
-					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				}
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			};
 		});
 	}
@@ -49,15 +49,26 @@ namespace event_benchmark {
 		
 		is_running.store(true);
 		running_thread = std::thread([this]() {
-			uint64_t count = 0;
-			while (is_running) {
-				count++;
-				for (mq_desc& desc : manager->queues) {
-					if (mq_send(desc.second, reinterpret_cast<const char*>(&count), sizeof(uint64_t), 0) == -1) {
-						std::cerr << "Failed to send message to " << desc.first << std::endl;
-					}
+			std::list<std::thread> threads;
+			for (mq_desc& desc : manager->queues) {
+				threads.push_back(
+					std::thread([this, desc]() {
+						uint64_t count = 0;
+						while (is_running) {
+							count++;
+							if (mq_send(desc.second, reinterpret_cast<const char*>(&count), sizeof(uint64_t), 0) == -1) {
+								std::cerr << "Failed to send message to " << desc.first << std::endl;
+							}
+						}
+					})
+				);
+			}
+			
+			for (std::thread& thread : threads) {
+				if (thread.joinable()) {
+					thread.join();
 				}
-			};
+			}
 		});
 	}
 

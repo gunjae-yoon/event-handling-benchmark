@@ -18,8 +18,8 @@ namespace event_benchmark {
 			void measure_reaction_time() override;
 			void measure_throughput() override;
 			
-			[[nodiscard]] ReactionTime get_reaction_time() const override;
-			[[nodiscard]] Throughput get_throughput() const override;
+			[[nodiscard]] ReactionTime get_reaction_time() override;
+			[[nodiscard]] Throughput get_throughput() override;
 		};
 	}
 }

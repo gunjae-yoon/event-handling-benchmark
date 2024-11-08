@@ -37,8 +37,8 @@ namespace event_benchmark {
 		virtual void measure_throughput() = 0;
 		void stop() noexcept;
 		
-		[[nodiscard]] virtual ReactionTime get_reaction_time() const = 0;
-		[[nodiscard]] virtual Throughput get_throughput() const = 0;
+		[[nodiscard]] virtual ReactionTime get_reaction_time() = 0;
+		[[nodiscard]] virtual Throughput get_throughput() = 0;
 	
 	protected:
 		std::shared_ptr<MqManager> manager;
