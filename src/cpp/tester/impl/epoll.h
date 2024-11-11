@@ -36,6 +36,7 @@ namespace event_benchmark {
 				Throughput statistics;
 			} throughput;
 			int32_t epoll;
+			const uint64_t max_events;
 		};
 	}
 }
