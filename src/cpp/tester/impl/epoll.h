@@ -4,6 +4,7 @@
 #include "tester/base/tester.h"
 #include <list>
 #include <mutex>
+#include <sys/epoll.h>
 
 namespace event_benchmark {
 	namespace epoll {
@@ -34,6 +35,7 @@ namespace event_benchmark {
 				std::mutex mutex;
 				Throughput statistics;
 			} throughput;
+			int32_t epoll;
 		};
 	}
 }

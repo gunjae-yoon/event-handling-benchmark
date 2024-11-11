@@ -16,7 +16,7 @@ namespace event_benchmark {
 		reset();
 	}
 
-	bool MqManager::reset(const uint64_t count, const uint64_t msg_size) {
+	bool MqManager::reset(const uint64_t count, const uint64_t msg_size, const bool nonblocked) {
 		// step 1. close and remove(unlink) previous message queues
 		for (mq_desc& desc : queues) {
 			mq_close(desc.second);
@@ -37,7 +37,12 @@ namespace event_benchmark {
 		// step 3. open message queues
 		for (uint64_t counter = 0; counter < count; counter++) {
 			std::string mq_name = "/testcase_" + std::to_string(id.fetch_add(1));
-			mqd_t mq_handle = mq_open(mq_name.c_str(), O_CREAT | O_RDWR, 0666, &attr);
+			mqd_t mq_handle = -1;
+			if (nonblocked) {
+				mq_handle = mq_open(mq_name.c_str(), O_CREAT | O_RDWR | O_NONBLOCK, 0666, &attr);
+			} else {
+				mq_handle = mq_open(mq_name.c_str(), O_CREAT | O_RDWR, 0666, &attr);
+			}
 			if (mq_handle == -1) {
 				std::cerr << "Failed to open message queue" << std::endl;
 				return false;
