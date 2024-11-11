@@ -18,15 +18,20 @@ void test_reaction_time_of_multithreading(const uint64_t count, const uint64_t s
 void test_throughput_of_multithreading(const uint64_t count, const uint64_t size);
 
 int main(int argc, char** argv) {
-	test_reaction_time_of_epoll(10, 1024);
-	test_throughput_of_epoll(10, 1024);
-	test_reaction_time_of_multithreading(10, 1024);
-	test_throughput_of_multithreading(10, 1024);
+	size_t data_size = 1024;
+	for (size_t count = 10; count <= 100; count += 10) {
+		std::cout << "count: " << count << ", data_size: " << data_size << std::endl;
+		test_reaction_time_of_epoll(count, data_size);
+		test_throughput_of_epoll(count, data_size);
+		test_reaction_time_of_multithreading(count, data_size);
+		test_throughput_of_multithreading(count, data_size);
+		std::cout << std::endl;
+	}
 }
 
 void test_reaction_time_of_epoll(const uint64_t count, const uint64_t size) {
 	std::shared_ptr<MqManager> manager = std::make_shared<MqManager>();
-	if (manager->reset(count, size) == false) {
+	if (manager->reset(count, size, true) == false) {
 		manager.reset();
 		return;
 	}
@@ -70,7 +75,7 @@ void test_reaction_time_of_epoll(const uint64_t count, const uint64_t size) {
 
 void test_throughput_of_epoll(const uint64_t count, const uint64_t size) {
 	std::shared_ptr<MqManager> manager = std::make_shared<MqManager>();
-	if (manager->reset(count, size) == false) {
+	if (manager->reset(count, size, true) == false) {
 		manager.reset();
 		return;
 	}

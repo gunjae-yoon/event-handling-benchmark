@@ -8,7 +8,8 @@ using namespace std::chrono_literals;
 
 namespace event_benchmark::epoll {
 	TesterImpl::TesterImpl() : Tester(),
-		epoll(-1) {
+		epoll(-1),
+		max_events(100) {
 	}
 
 	TesterImpl::~TesterImpl() {
@@ -33,11 +34,24 @@ namespace event_benchmark::epoll {
 		}
 		
 		// step 2. register message queues to epoll
+		/*
+		// Note. indexing style: mqd_t
 		for (mq_desc& attr : manager->queues) {
 			epoll_event event;
 			event.events = EPOLLIN;
 			event.data.fd = attr.second;
 			if (epoll_ctl(epoll, EPOLL_CTL_ADD, attr.second, &event) == -1) {
+				throw std::runtime_error("Failed to add a mq descriptor to epoll");
+			}
+		}
+		*/
+		// Note. indexing style: index of descriptor
+		for (uint64_t idx = 0; idx < manager->queues.size(); idx++) {
+			epoll_event event;
+			//event.events = EPOLLIN | EPOLLET;
+			event.events = EPOLLIN;
+			event.data.u64 = idx;
+			if (epoll_ctl(epoll, EPOLL_CTL_ADD, manager->queues[idx].second, &event) == -1) {
 				throw std::runtime_error("Failed to add a mq descriptor to epoll");
 			}
 		}
@@ -63,11 +77,11 @@ namespace event_benchmark::epoll {
 			uint64_t timeout_ms = 1000;
 			int64_t received = 0;
 			uint64_t msg_size = manager->msg_size();
-			epoll_event* events = new epoll_event[manager->queues.size()];
+			epoll_event events[max_events];
 			char* buffer = new char[msg_size];
 			
 			do {
-				int32_t announced = epoll_wait(epoll, events, manager->queues.size(), timeout_ms);
+				int32_t announced = epoll_wait(epoll, events, max_events, timeout_ms);
 				if (announced == -1) {
 					received = 0;
 					// failed to wait epoll
@@ -77,7 +91,10 @@ namespace event_benchmark::epoll {
 				}
 				
 				for (size_t idx = 0; idx < announced; idx++) {
-					mqd_t mq = events[idx].data.fd;
+					// Note. indexing style: mqd_t
+					//mqd_t mq = events[idx].data.fd;
+					// Note. indexing style: index of descriptor
+					mqd_t mq = manager->queues[events[idx].data.u64].second;
 					received = mq_receive(mq, buffer, msg_size, nullptr);
 					if (received > 0) {
 						std::chrono::nanoseconds now = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch());
@@ -90,18 +107,95 @@ namespace event_benchmark::epoll {
 			} while (is_running.load() && (received > 0));
 			
 			delete[] (buffer);
-			delete[] (events);
 			close(epoll);
 			epoll = -1;
 		});
 	}
 
 	void TesterImpl::measure_throughput() {
+		// step 1. check condition
 		if (is_running.load()) {
 			return;
 		}
-		
 		is_running.store(true);
+		
+		// step 2. clear results from the last test
+		{
+			std::unique_lock<std::mutex> lock(reaction_time.mutex);
+			reaction_time.results.clear();
+		}
+		
+		// step 3. create main thread for reaction time test of epoll
+		running_thread = std::thread([this]() {
+			const uint64_t timeout_ms = 1000;
+			const uint64_t msg_size = manager->msg_size();
+			const uint64_t total = manager->queues.size();
+			epoll_event events[max_events];
+			char* buffer = new char[msg_size];
+			std::atomic<uint64_t>* counts = new std::atomic<uint64_t>[total];
+			int64_t received = 0;
+			
+			std::thread counting_thread = std::thread([this, counts, total]() {
+				// remove first step
+				std::this_thread::sleep_for(1s);
+				for (size_t idx = 0; idx < total; idx++) {
+					counts[idx].store(0);
+				}
+				
+				while (is_running.load()) {
+					std::this_thread::sleep_for(1s);
+					for (size_t idx = 0; idx < total; idx++) {
+						uint64_t the_last_value = counts[idx].exchange(0);
+						if (the_last_value > 0) {
+							throughput.results.push_back(the_last_value);
+						}
+					}
+				}
+				
+				if (throughput.results.size() > total) {
+					for (size_t cnt = 0; cnt < total; cnt++) {
+						throughput.results.pop_back();
+					}
+				}
+			});
+			
+			do {
+				int32_t announced = epoll_wait(epoll, events, max_events, timeout_ms);
+				if (announced == -1) {
+					received = 0;
+					// failed to wait epoll
+				} else if (announced == 0) {
+					received = 0;
+					// timeout
+				}
+				
+				for (size_t idx = 0; idx < announced; idx++) {
+					// Note. indexing style: mqd_t
+					//mqd_t mq = events[idx].data.fd;
+					// Note. indexing style: index of descriptor
+					uint64_t mq_idx = events[idx].data.u64;
+					mqd_t mq = manager->queues[mq_idx].second;
+					
+					received = mq_receive(mq, buffer, msg_size, nullptr);
+					if (received > 0) {
+						counts[mq_idx]++;
+					} else {
+						break;
+					}
+				}
+			} while (is_running.load() && (received > 0));
+			
+			is_running.store(false);
+			
+			if (counting_thread.joinable()) {
+				counting_thread.join();
+			}
+			
+			delete[] (buffer);
+			delete[] (counts);
+			close(epoll);
+			epoll = -1;
+		});
 	}
 
 	ReactionTime TesterImpl::get_reaction_time() {
@@ -134,7 +228,32 @@ namespace event_benchmark::epoll {
 	}
 
 	Throughput TesterImpl::get_throughput() {
-		Throughput result = {0, 0, 0};
-		return result;
+		if (running_thread.joinable()) {
+			running_thread.join();
+		}
+
+		// step 4. generate statistics
+		std::unique_lock<std::mutex> lock(throughput.mutex);
+		
+		// step 4.1. reset the lastest statistics
+		throughput.statistics.minimum = std::numeric_limits<uint64_t>::max();
+		throughput.statistics.maximum = 0;
+		throughput.statistics.average = 0;
+		
+		// step 4.2. generate statistics
+		for (uint64_t result : throughput.results) {
+			if (result < throughput.statistics.minimum) {
+				throughput.statistics.minimum = result;
+			}
+			if (result > throughput.statistics.maximum) {
+				throughput.statistics.maximum = result;
+			}
+			throughput.statistics.average += result;
+		}
+		if (throughput.results.size() > 0) {
+			throughput.statistics.average = throughput.statistics.average / throughput.results.size();
+		}
+
+		return throughput.statistics;
 	}
 }

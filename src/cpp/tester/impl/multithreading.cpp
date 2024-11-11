@@ -92,6 +92,7 @@ namespace event_benchmark::multithreading {
 		
 		// step 3. create main thread for reaction time test of multithreading
 		uint64_t total = manager->queues.size();
+		threads.reserve(total + 1);
 		std::atomic<uint64_t>* counts = new std::atomic<uint64_t>[total];
 		running_thread = std::thread([this, counts, total]() {
 			// step 3.1. create threads for multithreading
@@ -150,8 +151,8 @@ namespace event_benchmark::multithreading {
 					thread.join();
 				}
 			}
+			delete[] (counts);
 		});
-		delete[](counts);
 	}
 
 	ReactionTime TesterImpl::get_reaction_time() {

@@ -57,7 +57,7 @@ namespace event_benchmark {
 						while (is_running) {
 							count++;
 							if (mq_send(desc.second, reinterpret_cast<const char*>(&count), sizeof(uint64_t), 0) == -1) {
-								std::cerr << "Failed to send message to " << desc.first << std::endl;
+								//std::cerr << "Failed to send message to " << desc.first << std::endl;
 							}
 						}
 					})
