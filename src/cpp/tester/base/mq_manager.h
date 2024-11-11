@@ -18,7 +18,7 @@ namespace event_benchmark {
 		MqManager() noexcept;
 		~MqManager();
 		
-		bool reset(const uint64_t count = 0, const uint64_t msg_size = 0);
+		bool reset(const uint64_t count = 0, const uint64_t msg_size = 0, const bool nonblocked = false);
 		void dispose();
 		uint64_t msg_size();
 	
